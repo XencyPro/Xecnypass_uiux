@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>XencyPass — Vault</title>
+  <!-- Google Fonts: Inter + Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: #0F172A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      color: #E5E7EB;
+    }
+
+    .vault-app {
+      max-width: 400px;
+      width: 100%;
+      height: 750px;
+      background: linear-gradient(145deg, #111827 0%, #1F2937 100%);
+      border-radius: 32px;
+      box-shadow: 0 20px 35px -10px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- TOPBAR --- */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px 12px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .app-icon {
+      width: 36px;
+      height: 36px;
+      background: #3B82F6;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+    }
+    .app-name {
+      font-weight: 700;
+      font-size: 18px;
+      color: #E5E7EB;
+      letter-spacing: -0.3px;
+    }
+    .avatar {
+      width: 36px;
+      height: 36px;
+      background: #1E293B;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9CA3AF;
+      font-size: 16px;
+      border: 1px solid #2D3A5E;
+    }
+
+    /* --- SEARCH & FILTER --- */
+    .search-row {
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+    .search-wrapper {
+      flex: 1;
+      position: relative;
+    }
+    .search-wrapper i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6C7A91;
+      font-size: 14px;
+    }
+    .search-input {
+      width: 100%;
+      background: #0A0F1A;
+      border: 1px solid #2D3A5E;
+      border-radius: 30px;
+      padding: 10px 12px 10px 40px;
+      font-size: 14px;
+      color: #E5E7EB;
+      outline: none;
+    }
+    .search-input:focus { border-color: #3B82F6; }
+
+    .filter-btn {
+      background: #0A0F1A;
+      border: 1px solid #2D3A5E;
+      width: 40px;
+      height: 40px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #E5E7EB;
+      transition: 0.2s;
+    }
+    .filter-btn.active { background: #3B82F6; border-color: #3B82F6; }
+
+    /* Filter Dropdown Menu */
+    .filter-menu {
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background: #1F2937;
+      border: 1px solid #2D3A5E;
+      border-radius: 16px;
+      width: 180px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 50;
+      padding: 8px;
+      display: none;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .filter-menu.show { display: block; }
+    .filter-option {
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #9CA3AF;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: 0.2s;
+    }
+    .filter-option:hover { background: #0F172A; color: #E5E7EB; }
+    .filter-option.selected { color: #3B82F6; background: rgba(59, 130, 246, 0.1); }
+
+    /* --- TABS --- */
+    .tabs {
+      display: flex;
+      padding: 0 20px;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 8px 0;
+      font-weight: 600;
+      font-size: 13px;
+      color: #9CA3AF;
+      cursor: pointer;
+      border-radius: 40px;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: #3B82F6;
+      color: white;
+    }
+
+    /* --- LIST VIEW --- */
+    .content-area {
+      flex: 1;
+      padding: 10px 20px 80px 20px;
+      overflow-y: auto;
+    }
+
+    .list-item {
+      background: #0F172A;
+      border-radius: 16px;
+      padding: 14px 12px;
+      margin-bottom: 10px;
+      border: 1px solid #1E293B;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .list-item:hover { border-color: #3B82F6; }
+    
+    .item-main-content {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item-header-part {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .item-icon { 
+      width: 36px; 
+      height: 36px; 
+      background: #1E293B; 
+      border-radius: 10px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      color: #3B82F6; 
+      flex-shrink: 0; 
+    }
+    
+    .item-info { flex: 1; overflow: hidden; }
+    .item-title { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-sub { font-size: 12px; color: #9CA3AF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    
+    .item-right-indicators { 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      flex-shrink: 0;
+      height: 100%;
+    }
+    
+    .favorite-star { color: #F59E0B; font-size: 14px; }
+    .favorite-star.inactive { color: #6C7A91; opacity: 0.3; }
+    .strength-dot { width: 8px; height: 8px; border-radius: 50%; background: #6C7A91; }
+    .strength-dot.strong { background: #10B981; box-shadow: 0 0 4px #10B981; }
+    .strength-dot.medium { background: #F59E0B; box-shadow: 0 0 4px #F59E0B; }
+    .strength-dot.weak { background: #EF4444; box-shadow: 0 0 4px #EF4444; }
+
+    .tags-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .tag { font-size: 10px; padding: 2px 8px; border-radius: 30px; background: #1E293B; color: #9CA3AF; display: inline-flex; align-items: center; gap: 4px; }
+    .tag.important { background: rgba(239,68,68,0.15); color: #F87171; border: 0.5px solid rgba(239,68,68,0.3); }
+
+    /* --- DETAIL SCREEN --- */
+    .detail-overlay {
+      position: absolute;
+      inset: 0;
+      background: #0F172A;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      animation: modalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+    .detail-header-nav {
+      padding: 24px 20px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      background: #1F2937;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .detail-body { flex: 1; padding: 0 20px 40px; overflow-y: auto; }
+
+    .detail-top-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .detail-app-icon {
+      width: 56px;
+      height: 56px;
+      background: #1F2937;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #3B82F6;
+      font-size: 24px;
+    }
+    .detail-titles { flex: 1; }
+    .detail-titles h2 { font-size: 22px; font-weight: 700; color: #E5E7EB; }
+    .detail-titles p { font-size: 12px; color: #9CA3AF; }
+    .detail-header-icons { display: flex; gap: 15px; align-items: center; }
+    .fav-toggle-btn { font-size: 24px; color: #9CA3AF; cursor: pointer; transition: 0.2s; }
+    .fav-toggle-btn.active { color: #F59E0B; }
+    .imp-toggle-btn { font-size: 24px; color: #9CA3AF; cursor: pointer; transition: 0.2s; }
+    .imp-toggle-btn.active { color: #EF4444; }
+
+    .premium-card {
+      background: #111827;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255,255,255,0.05);
+      animation: cardFadeIn 0.4s ease forwards;
+      opacity: 0;
+    }
+    @keyframes cardFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .card-label { font-size: 11px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: block; }
+    .card-value { font-size: 16px; font-weight: 500; color: #E5E7EB; display: flex; align-items: center; justify-content: space-between; }
+
+    .password-focus-card { border: 1px solid rgba(59, 130, 246, 0.3); box-shadow: 0 4px 20px rgba(59, 130, 246, 0.05); }
+    .pwd-actions i { color: #3B82F6; cursor: pointer; padding: 4px; margin-left: 10px; }
+
+    .codes-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 5px; }
+    .code-chip { background: #0A0F1A; border: 1px solid #1F2937; border-radius: 10px; padding: 8px; font-size: 13px; font-weight: 600; text-align: center; color: #3B82F6; cursor: pointer; }
+    
+    .phrase-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+    .phrase-word { background: #0A0F1A; border: 1px solid #1F2937; border-radius: 8px; padding: 6px 10px; font-size: 12px; display: flex; gap: 8px; align-items: center; }
+    .word-index { color: #9CA3AF; font-size: 10px; font-weight: 700; }
+
+    /* Dialogs & Toasts */
+    .dialog-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 110; display: flex; align-items: center; justify-content: center; padding: 30px; animation: fadeIn 0.2s; }
+    .dialog-card { background: #1F2937; border-radius: 24px; padding: 24px; text-align: center; border: 1px solid #3B82F6; max-width: 320px; }
+    .dialog-card h3 { font-size: 18px; margin-bottom: 12px; color: #EF4444; }
+    .dialog-card p { font-size: 13px; line-height: 1.6; color: #9CA3AF; margin-bottom: 20px; }
+    .dialog-btn { background: #3B82F6; color: white; border: none; padding: 12px 24px; border-radius: 14px; font-weight: 600; cursor: pointer; }
+
+    .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1F2937; color: white; padding: 10px 20px; border-radius: 30px; font-size: 13px; opacity: 0; transition: 0.3s; z-index: 1000; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .fab-container { position: absolute; bottom: 24px; right: 24px; }
+    .fab { background: #3B82F6; width: 56px; height: 56px; border-radius: 18px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; cursor: pointer; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="vault-app">
+  <div class="topbar">
+    <div class="app-icon"><i class="fas fa-shield-alt"></i></div>
+    <div class="app-name">XencyPass</div>
+    <div class="avatar"><i class="fas fa-user"></i></div>
+  </div>
+
+  <!-- Search & Filter Area -->
+  <div class="search-row">
+    <div class="search-wrapper">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" class="search-input" placeholder="Search your vault...">
+    </div>
+    <div class="filter-btn" id="filterToggle"><i class="fas fa-sliders-h"></i></div>
+    
+    <!-- Filter Menu -->
+    <div class="filter-menu" id="filterMenu">
+      <div class="filter-option selected" data-filter="all"><i class="fas fa-th-large"></i> All Items</div>
+      <div class="filter-option" data-filter="favorites"><i class="fas fa-star"></i> Favorites</div>
+      <div class="filter-option" data-filter="important"><i class="fas fa-exclamation-triangle"></i> Important</div>
+      <div class="filter-option" data-filter="strong"><i class="fas fa-check-circle"></i> Strong Pwd</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="passwords">Passwords</div>
+    <div class="tab" data-tab="wallet">Wallet</div>
+    <div class="tab" data-tab="notes">Notes</div>
+  </div>
+
+  <div class="content-area" id="contentArea"></div>
+
+  <div class="fab-container">
+    <div class="fab" id="fabBtn"><i class="fas fa-plus"></i></div>
+  </div>
+
+  <div id="toast" class="toast">Copied to clipboard</div>
+</div>
+
+<!-- Important Modal Dialog -->
+<div id="impDialog" class="dialog-overlay hidden">
+  <div class="dialog-card">
+    <h3>Mark as Important?</h3>
+    <p id="impDialogText">Marking this as important will trigger a server-side backup. Even if you lose your Google account, these credentials will be recoverable from our primary vault server.</p>
+    <button class="dialog-btn" id="closeImpDialog">Ami Bujhechi (I Understand)</button>
+  </div>
+</div>
+
+<script>
+  // ---------- Data ----------
+  let passwords = [
+    { 
+      id: 'p1', 
+      type: 'app', 
+      name: 'Google', 
+      username: 'ay.user@gmail.com', 
+      password: 'SafePassword123!', 
+      category: 'Social', 
+      favorite: true, 
+      important: true, 
+      strength: 'strong',
+      digitsCodes: ['44556677', '11223344', '99887766'],
+      secretPhrase: 'apple banana cherry dragon elephant forest', 
+      websiteLink: '',
+      note: 'Primary personal account.'
+    },
+    { 
+      id: 'p2', 
+      type: 'website', 
+      name: 'GitHub', 
+      username: 'ay_developer', 
+      password: 'ghp_secure_token_abc', 
+      category: 'Dev', 
+      favorite: false, 
+      important: false, 
+      strength: 'medium',
+      digitsCodes: ['88775522'],
+      secretPhrase: 'mountain ocean stars', 
+      websiteLink: 'https://github.com',
+      note: 'Used for main repository backup.'
+    },
+    { 
+      id: 'p3', 
+      type: 'app', 
+      name: 'Netflix', 
+      username: 'ay.stream@mail.com', 
+      password: 'mypassword123', 
+      category: 'Entertainment', 
+      favorite: false, 
+      important: true, 
+      strength: 'weak',
+      digitsCodes: [],
+      secretPhrase: '', 
+      websiteLink: '',
+      note: 'Shared family plan.'
+    }
+  ];
+
+  let searchQuery = '';
+  let activeFilter = 'all';
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  function copyToClipboard(text) {
+    const el = document.createElement('textarea');
+    el.value = text;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    showToast("Copied to clipboard");
+  }
+
+  // ---------- Render List (Vertically Centered with Filtering & Secret Phrase Tag) ----------
+  function renderList() {
+    const container = document.getElementById('contentArea');
+    
+    // Filtering Logic
+    let filtered = passwords.filter(p => {
+      const matchesSearch = p.name.toLowerCase().includes(searchQuery) || p.username.toLowerCase().includes(searchQuery);
+      
+      let matchesFilter = true;
+      if (activeFilter === 'favorites') matchesFilter = p.favorite;
+      else if (activeFilter === 'important') matchesFilter = p.important;
+      else if (activeFilter === 'strong') matchesFilter = p.strength === 'strong';
+      
+      return matchesSearch && matchesFilter;
+    });
+    
+    if (filtered.length === 0) {
+      container.innerHTML = `<div style="text-align:center; padding-top:40px; color:#6C7A91; font-size:14px;">No items found...</div>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map(p => `
+      <div class="list-item" onclick="openDetail('${p.id}')">
+        <div class="item-main-content">
+          <div class="item-header-part">
+            <div class="item-icon"><i class="fas ${p.type === 'app' ? 'fa-mobile-alt' : 'fa-globe'}"></i></div>
+            <div class="item-info">
+              <div class="item-title">${p.name}</div>
+              <div class="item-sub">${p.username}</div>
+            </div>
+          </div>
+          <div class="tags-row">
+            ${p.digitsCodes.length > 0 ? `<span class="tag"><i class="fas fa-hashtag"></i> ${p.digitsCodes.length} Codes</span>` : ''}
+            ${p.secretPhrase ? `<span class="tag"><i class="fas fa-comment-dots"></i> Secret Phrase</span>` : ''}
+            ${p.important ? `<span class="tag important"><i class="fas fa-exclamation-triangle"></i> Important</span>` : ''}
+          </div>
+        </div>
+        <div class="item-right-indicators">
+          <i class="fas fa-star favorite-star ${p.favorite ? '' : 'inactive'}"></i>
+          <span class="strength-dot ${p.strength}"></span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ---------- Detail Screen ----------
+  function openDetail(id) {
+    const p = passwords.find(item => item.id === id);
+    if (!p) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'detail-overlay';
+    overlay.id = 'detailScreen';
+
+    const phraseWords = p.secretPhrase ? p.secretPhrase.split(' ') : [];
+
+    overlay.innerHTML = `
+      <div class="detail-header-nav">
+        <div class="back-btn" onclick="closeDetail()"><i class="fas fa-chevron-left"></i></div>
+        <div class="app-name">Details View</div>
+        <div class="back-btn" onclick="showToast('Settings shared')"><i class="fas fa-share-alt"></i></div>
+      </div>
+
+      <div class="detail-body">
+        <div class="detail-top-section">
+          <div class="detail-app-icon"><i class="fas ${p.type === 'app' ? 'fa-mobile-alt' : 'fa-globe'}"></i></div>
+          <div class="detail-titles">
+            <h2>${p.name}</h2>
+            <p>Platform Name</p>
+          </div>
+          <div class="detail-header-icons">
+            <i class="fas fa-star fav-toggle-btn ${p.favorite ? 'active' : ''}" id="favBtnModal"></i>
+            <i class="fas fa-exclamation-triangle imp-toggle-btn ${p.important ? 'active' : ''}" id="impBtnModal"></i>
+          </div>
+        </div>
+
+        <div class="premium-card" style="animation-delay: 0.1s">
+          <span class="card-label">Identification (Username/Email)</span>
+          <div class="card-value">
+            <span>${p.username}</span>
+            <i class="fas fa-copy" style="color:#3B82F6; font-size:14px; cursor:pointer;" onclick="copyToClipboard('${p.username}')"></i>
+          </div>
+        </div>
+
+        <div class="premium-card password-focus-card" style="animation-delay: 0.15s">
+          <span class="card-label">Security Key (Password)</span>
+          <div class="card-value">
+            <span id="pwdDisplay">••••••••</span>
+            <div class="pwd-actions">
+              <i class="fas fa-eye" id="pwdToggle"></i>
+              <i class="fas fa-copy" onclick="copyToClipboard('${p.password}')"></i>
+            </div>
+          </div>
+        </div>
+
+        ${p.digitsCodes.length > 0 ? `
+        <div class="premium-card" style="animation-delay: 0.2s">
+          <span class="card-label">8-Digit Security Codes (Max 10)</span>
+          <div class="codes-grid">
+            ${p.digitsCodes.map(code => `<div class="code-chip" onclick="copyToClipboard('${code}')">${code}</div>`).join('')}
+          </div>
+        </div>
+        ` : ''}
+
+        ${phraseWords.length > 0 ? `
+        <div class="premium-card" style="animation-delay: 0.25s">
+          <span class="card-label">Recovery Secret Phrase</span>
+          <div class="phrase-container">
+            ${phraseWords.map((word, i) => `
+              <div class="phrase-word">
+                <span class="word-index">${i + 1}</span>
+                <span>${word}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        ` : ''}
+
+        <div class="premium-card" style="animation-delay: 0.3s">
+          <span class="card-label">Category / Grouping</span>
+          <div class="card-value" style="font-size:14px;">${p.category}</div>
+          
+          ${p.type === 'website' ? `
+            <div style="margin-top:16px;">
+              <span class="card-label">Website Access Link</span>
+              <div class="card-value">
+                <a href="${p.websiteLink}" target="_blank" style="color:#3B82F6; text-decoration:none; font-size:14px;">${p.websiteLink.replace('https://', '')}</a>
+                <i class="fas fa-external-link-alt" style="color:#3B82F6; font-size:12px;"></i>
+              </div>
+            </div>
+          ` : ''}
+
+          <div style="margin-top:16px;">
+            <span class="card-label">Confidential Note</span>
+            <p style="font-size:13px; line-height:1.5; color:#9CA3AF;">${p.note || 'No notes added.'}</p>
+          </div>
+        </div>
+
+        <div class="detail-footer-actions" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px;">
+          <button style="padding:14px; border-radius:14px; background:#3B82F6; color:white; border:none; font-weight:600; cursor:pointer;" onclick="showToast('Editing...')"><i class="fas fa-edit"></i> Edit</button>
+          <button style="padding:14px; border-radius:14px; background:rgba(239, 68, 68, 0.1); color:#EF4444; border:1px solid rgba(239, 68, 68, 0.2); font-weight:600; cursor:pointer;" onclick="handleDelete('${p.id}')"><i class="fas fa-trash"></i> Delete</button>
+        </div>
+      </div>
+    `;
+
+    document.querySelector('.vault-app').appendChild(overlay);
+
+    const pwdBtn = overlay.querySelector('#pwdToggle');
+    const pwdTxt = overlay.querySelector('#pwdDisplay');
+    let isRevealed = false;
+    pwdBtn.onclick = () => {
+      isRevealed = !isRevealed;
+      pwdTxt.textContent = isRevealed ? p.password : '••••••••';
+      pwdBtn.classList.toggle('fa-eye');
+      pwdBtn.classList.toggle('fa-eye-slash');
+    };
+
+    const favBtn = overlay.querySelector('#favBtnModal');
+    favBtn.onclick = () => {
+      p.favorite = !p.favorite;
+      favBtn.classList.toggle('active');
+      renderList();
+    };
+
+    const impBtn = overlay.querySelector('#impBtnModal');
+    impBtn.onclick = () => {
+      if (!p.important) {
+        document.getElementById('impDialog').classList.remove('hidden');
+        p.important = true;
+        impBtn.classList.add('active');
+      } else {
+        p.important = false;
+        impBtn.classList.remove('active');
+      }
+      renderList();
+    };
+  }
+
+  function closeDetail() {
+    const screen = document.getElementById('detailScreen');
+    if (screen) screen.remove();
+  }
+
+  function handleDelete(id) {
+    if (confirm("Delete this entry?")) {
+      passwords = passwords.filter(item => item.id !== id);
+      closeDetail();
+      renderList();
+    }
+  }
+
+  // --- Filtering & UI Logic ---
+  const filterBtn = document.getElementById('filterToggle');
+  const filterMenu = document.getElementById('filterMenu');
+  
+  filterBtn.onclick = (e) => {
+    e.stopPropagation();
+    filterMenu.classList.toggle('show');
+  };
+
+  document.querySelectorAll('.filter-option').forEach(opt => {
+    opt.onclick = () => {
+      document.querySelectorAll('.filter-option').forEach(el => el.classList.remove('selected'));
+      opt.classList.add('selected');
+      activeFilter = opt.dataset.filter;
+      
+      // Toggle button style if filter is active
+      if (activeFilter !== 'all') filterBtn.classList.add('active');
+      else filterBtn.classList.remove('active');
+      
+      filterMenu.classList.remove('show');
+      renderList();
+    };
+  });
+
+  // Close menu on click outside
+  window.onclick = () => { if (filterMenu.classList.contains('show')) filterMenu.classList.remove('show'); };
+
+  // Live Search
+  document.getElementById('searchInput').oninput = (e) => {
+    searchQuery = e.target.value.toLowerCase();
+    renderList();
+  };
+
+  document.getElementById('closeImpDialog').onclick = () => {
+    document.getElementById('impDialog').classList.add('hidden');
+    showToast("Server backup activated.");
+  };
+
+  renderList();
+</script>
+</body>
+</html>
